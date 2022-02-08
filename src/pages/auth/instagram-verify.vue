@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-    import { doc, setDoc, serverTimestamp, Timestamp, collection, addDoc } from "firebase/firestore"; 
+    import { doc, setDoc, serverTimestamp, collection, query, where, getDocs, orderBy, limit, updateDoc, DocumentReference, DocumentData  } from "firebase/firestore"; 
 
     const { $firebaseDB } = useNuxtApp();
     const route = useRoute();
@@ -21,16 +21,47 @@
 
     const config = useRuntimeConfig();
 
+    interface InstagramResponse {
+        username: string, 
+        token_type: string,
+        media_count: number, 
+        id: string, 
+        expires_in: number,
+        account_type: string, 
+        access_token: string
+    }
+
     let loading: { state: number } = reactive({state: 0})
     let message: { error: string, output:string } = reactive({error: "", output: ""})
 
-    const response = await useFetch(`${config.instagramVerifyUrl}?code=${code}`);
+    const {data, error} = await useFetch(`${config.instagramVerifyUrl}?code=${code}`);
+
+    if (error.value) {
+        loading.state = -1;
+        message.error = "error fetching data";
+    }
 
     onMounted(async () => {
         const user = await getUserDataPromised();
-        const instagramDocRef = doc(collection($firebaseDB, "instagram"));
-        setDoc(instagramDocRef, {
-            ...response.data.value,
+
+        const q = query(
+            collection($firebaseDB, "instagram"), 
+            where("userid", "==", user?.uid || ""), 
+            where("id", "==", `${data.value['id'] || ""}`),
+            orderBy("updatedAt", "desc"), 
+            limit(1)
+        );
+
+        let documentRef: DocumentReference<DocumentData>;
+
+        const querySnapshot = await getDocs(q);
+        if(querySnapshot.size>0){
+            documentRef = doc($firebaseDB, "instagram", querySnapshot.docs[0].id)
+        } else {
+            documentRef = doc(collection($firebaseDB, "instagram"));
+        }
+        setDoc(documentRef, {
+            ...data.value,
             userid: user?.uid || "",
             updatedAt: serverTimestamp(),
         }, { merge:true })
