@@ -34,46 +34,49 @@
     let loading: { state: number } = reactive({state: 0})
     let message: { error: string, output:string } = reactive({error: "", output: ""})
 
-    const {data, error} = await useFetch(`${config.instagramVerifyUrl}?code=${code}`);
+    const {data, pending, refresh, error} = await useFetch(`${config.instagramVerifyUrl}?code=${code}`);
+
 
     if (error.value) {
         loading.state = -1;
         message.error = "error fetching data";
+    } else {
+        onMounted(async () => {
+            const user = await getUserDataPromised();
+
+            const q = query(
+                collection($firebaseDB, "instagram"), 
+                where("userid", "==", user?.uid || ""), 
+                where("id", "==", `${data.value['id'] || ""}`),
+                orderBy("updatedAt", "desc"), 
+                limit(1)
+            );
+
+            let documentRef: DocumentReference<DocumentData>;
+
+            const querySnapshot = await getDocs(q);
+            if(querySnapshot.size>0){
+                documentRef = doc($firebaseDB, "instagram", querySnapshot.docs[0].id)
+            } else {
+                documentRef = doc(collection($firebaseDB, "instagram"));
+            }
+            setDoc(documentRef, {
+                ...data.value,
+                userid: user?.uid || "",
+                updatedAt: serverTimestamp(),
+            }, { merge:true })
+            .then(() => {
+                loading.state = 1;
+                message.output = "Successfully connected to instagram";
+            })
+            .catch((error)=>{
+                loading.state = -1;
+                message.error = error.message;
+            });
+        })
     }
 
-    onMounted(async () => {
-        const user = await getUserDataPromised();
-
-        const q = query(
-            collection($firebaseDB, "instagram"), 
-            where("userid", "==", user?.uid || ""), 
-            where("id", "==", `${data.value['id'] || ""}`),
-            orderBy("updatedAt", "desc"), 
-            limit(1)
-        );
-
-        let documentRef: DocumentReference<DocumentData>;
-
-        const querySnapshot = await getDocs(q);
-        if(querySnapshot.size>0){
-            documentRef = doc($firebaseDB, "instagram", querySnapshot.docs[0].id)
-        } else {
-            documentRef = doc(collection($firebaseDB, "instagram"));
-        }
-        setDoc(documentRef, {
-            ...data.value,
-            userid: user?.uid || "",
-            updatedAt: serverTimestamp(),
-        }, { merge:true })
-        .then(() => {
-            loading.state = 1;
-            message.output = "Successfully connected to instagram";
-        })
-        .catch((error)=>{
-            loading.state = -1;
-            message.error = error.message;
-        });
-    })
+    
     
     
 
