@@ -3,11 +3,8 @@
         <div v-if="loading.state==0">
             Loading....
         </div>
-        <div v-else-if="loading.state==1">
-            {{ message.output }}
-        </div>
-        <div v-else-if="loading.state==-1">
-            {{ message.error }}
+        <div v-else>
+            Done
         </div>
     </div>
 </template>
@@ -29,60 +26,70 @@
     const {data, pending, refresh, error} = await useFetch(`${config.facebookVerifyUrl}?code=${code}`);
 
 
-    if (error.value) {
-        loading.state = -1;
-        message.error = "error fetching data";
-    } else {
-        onMounted(async () => {
-            const user = await getUserDataPromised();
+    onMounted(async () => {
 
-            const all_accounts = data.value['data'] || []
+        if (error.value) {
+            loading.state = -1;
+            message.error = "error fetching data";
+            localStorage.setItem("socialmedia_facebook", `${JSON.stringify(message)}`);
+            window.close();
+        } 
 
-            const connected_accounts = filter(all_accounts.map((accounts) => ({
-                ...pickBy(accounts, () => has(accounts, 'instagram_business_account')),
-            })), negate(isEmpty));
+        const user = await getUserDataPromised();
 
-            console.log(connected_accounts)
-            
-            if (connected_accounts.length > 0) {
-                connected_accounts.map(async (account)=>{
-                    const q = query(
-                        collection($firebaseDB, "facebook"), 
-                        where("userid", "==", user?.uid || ""), 
-                        where("id", "==", `${account['id'] || ""}`),
-                        orderBy("updatedAt", "desc"), 
-                        limit(1)
-                    );
+        const all_accounts = data.value['data'] || []
 
-                    let documentRef: DocumentReference<DocumentData>;
+        const connected_accounts = filter(all_accounts.map((accounts) => ({
+            ...pickBy(accounts, () => has(accounts, 'instagram_business_account')),
+        })), negate(isEmpty));
 
-                    const querySnapshot = await getDocs(q);
-                    if(querySnapshot.size>0){
-                        documentRef = doc($firebaseDB, "facebook", querySnapshot.docs[0].id)
-                    } else {
-                        documentRef = doc(collection($firebaseDB, "facebook"));
-                    }
-                    setDoc(documentRef, {
-                        ...account,
-                        userid: user?.uid || "",
-                        updatedAt: serverTimestamp(),
-                    }, { merge:true })
-                    .then(() => {
-                        loading.state = 1;
-                        message.output = "Successfully connected to Facebook";
-                    })
-                    .catch((error)=>{
-                        loading.state = -1;
-                        message.error = error.message;
-                    });
+        console.log(connected_accounts)
+        
+        if (connected_accounts.length > 0) {
+            connected_accounts.map(async (account)=>{
+                const q = query(
+                    collection($firebaseDB, "facebook"), 
+                    where("userid", "==", user?.uid || ""), 
+                    where("id", "==", `${account['id'] || ""}`),
+                    orderBy("updatedAt", "desc"), 
+                    limit(1)
+                );
+
+                let documentRef: DocumentReference<DocumentData>;
+
+                const querySnapshot = await getDocs(q);
+                if(querySnapshot.size>0){
+                    documentRef = doc($firebaseDB, "facebook", querySnapshot.docs[0].id)
+                } else {
+                    documentRef = doc(collection($firebaseDB, "facebook"));
+                }
+                setDoc(documentRef, {
+                    ...account,
+                    userid: user?.uid || "",
+                    updatedAt: serverTimestamp(),
+                }, { merge:true })
+                .then(() => {
+                    loading.state = 1;
+                    message.output = "Successfully connected to Facebook";
+                    localStorage.setItem("socialmedia_facebook", `${JSON.stringify(message)}`);
+                    window.close();
                 })
-                
-            } else {
-                loading.state = -1;
-                message.error = "No Creator/Business Instagram Account Found.";
-            }
-        })
-    }
+                .catch((error)=>{
+                    loading.state = -1;
+                    message.error = error.message;
+                    localStorage.setItem("socialmedia_facebook", `${JSON.stringify(message)}`);
+                    window.close();
+                });
+            })
+            
+        } else {
+            loading.state = -1;
+            message.error = "No Creator/Business Instagram Account Found.";
+            localStorage.setItem("socialmedia_facebook", `${JSON.stringify(message)}`);
+            window.close();
+        }
+    })
+    
 
     
     

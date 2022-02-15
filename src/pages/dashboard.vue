@@ -30,10 +30,20 @@
     }
 
     const facebookConnect = () => {
-        window.open(`https://www.facebook.com/v12.0/dialog/oauth?client_id=${config.facebookClientId}&`+
+        const facebook_window = window.open(`https://www.facebook.com/v12.0/dialog/oauth?client_id=${config.facebookClientId}&`+
             `redirect_uri=${config.facebookRedirectUri}&scope=public_profile,email,instagram_basic,`+
             `read_insights,instagram_manage_insights,pages_show_list,pages_read_engagement&`+
             `response_type=code&display=popup&auth_type=rerequest`,
             '_blank', params);
+
+        const timer = setInterval(() => {
+            const socialmedia_facebook = localStorage.getItem("socialmedia_facebook");
+            localStorage.removeItem("socialmedia_facebook");
+
+            if (facebook_window.closed) {
+                clearInterval(timer);
+                socialmedia_facebook ? alert(socialmedia_facebook) : alert('Closed too early')
+            }
+        }, 3000);
     }
 </script>
