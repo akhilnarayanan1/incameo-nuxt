@@ -1,6 +1,6 @@
 <template>
     <div>
-        {{ firebaseUser }}
+        {{ firebaseUser?.uid }}
         <button @click="instagramConnect">connect instagram</button>
         <button @click="facebookConnect">connect facebook</button>
     </div>
@@ -14,9 +14,19 @@
     let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=400,height=600,left=100,top=100`;
 
     const instagramConnect = () => {
-        window.open(`https://www.instagram.com/oauth/authorize?client_id=${config.instagramClientId}&`+
+        const instagram_window = window.open(`https://www.instagram.com/oauth/authorize?client_id=${config.instagramClientId}&`+
             `redirect_uri=${config.instagramRedirectUri}&scope=user_profile,user_media&response_type=code`,
             '_blank', params);
+
+        const timer = setInterval(() => {
+            const socialmedia_instagram = localStorage.getItem("socialmedia_instagram");
+            localStorage.removeItem("socialmedia_instagram");
+
+            if (instagram_window.closed) {
+                clearInterval(timer);
+                socialmedia_instagram ? alert(socialmedia_instagram) : alert('Closed too early')
+            }
+        }, 3000);
     }
 
     const facebookConnect = () => {
