@@ -1,5 +1,4 @@
 <template>
-
   <form>
     <input v-model="signup_email" type="email" placeholder="Enter your e-mail" class="w-full input"> 
     <input v-model="signup_password" type="password" placeholder="Choose a password" class="w-full input" autocomplete="false"> 
@@ -17,7 +16,7 @@
 
   clearFieldAlertOnTyping({signup_email, signup_password, signup_confirm_password})
   
-
+  ifNoUIError({signup_email, signup_password, signup_confirm_password})
 
 
 </script>

@@ -29,3 +29,10 @@ export const clearFieldAlertOnTyping = (...args: {[key:string]: Ref<string>}[]) 
     }
   })
 }
+
+export const ifNoUIError = (...args: {[key:string]: Ref<string>}[]) => {
+  const fieldProps =  Object.keys(args[0]).map((k: string) => k);;
+  return computed(()=>(_.findIndex(getFieldAlerts().value, (o: {fieldid: string, type: string, source: string}) => {
+    return fieldProps.includes(o.fieldid) && o.type === "error" && o.source === "ui"
+  })) < 0 ? true : false);
+}
