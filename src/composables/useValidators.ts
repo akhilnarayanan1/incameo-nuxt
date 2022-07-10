@@ -1,3 +1,4 @@
+import { User } from "firebase/auth";
 import { Ref } from "vue";
 
 export const checkRequiredFieldsForSignup = (signup_email: Ref<string>, 
@@ -67,4 +68,17 @@ export const checkRequiredFieldsForLogin = (login_email: Ref<string>, login_pass
       type: "error",
     });
   };
+}
+
+export const blankUser = (user: User) => {
+  //Stop processing if user is blank
+  if(!user){
+    addToast({
+      message: "Unknown error, Please try again (101)",
+      type: "error",
+      duration: 2000,
+    });
+    return true;
+  };
+  return false;
 }

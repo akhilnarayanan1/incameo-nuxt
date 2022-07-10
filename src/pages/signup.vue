@@ -25,6 +25,8 @@
   const signup_password = ref("");
   const signup_confirm_password = ref("");
 
+  const user = firebaseUser().value;
+
   const showSubmitButton = ifNoUIError({signup_email, signup_password, signup_confirm_password})
   clearFieldAlertOnTyping({signup_email, signup_password, signup_confirm_password})
 
@@ -34,13 +36,14 @@
     // Validators
     checkRequiredFieldsForSignup(signup_email, signup_password, signup_confirm_password);
     passwordMatcherForSignup(signup_password, signup_confirm_password);
+    if (blankUser(user)) return;
     if (foundError({signup_email, signup_password, signup_confirm_password}).value) return;
 
     // Create account
     loading.signup = true;
     const credential = EmailAuthProvider.credential(signup_email.value, signup_password.value);
 
-    linkWithCredential(firebaseUser().value, credential)
+    linkWithCredential(user, credential)
     .then(async (userCredential) => {
       try{
         //Send verification email

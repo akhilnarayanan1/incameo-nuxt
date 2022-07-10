@@ -29,9 +29,8 @@
   const login_email = ref("");
   const login_password = ref("");
 
-  clearFieldAlertOnTyping({login_email, login_password})
-  
   const showSubmitButton = ifNoUIError({login_email, login_password})
+  clearFieldAlertOnTyping({login_email, login_password})
 
   const loginAccount = () => {
 
