@@ -34,6 +34,12 @@
   const showSubmitButton = ifNoUIError({login_email, login_password})
 
   const loginAccount = () => {
+
+    // Validators
+    checkRequiredFieldsForLogin(login_email, login_password);
+    if(foundError({login_email, login_password}).value) return;
+
+    // Login account
     loading.login = true;
     signInWithEmailAndPassword($firebaseAuth.value, login_email.value, login_password.value)
     .then((userCredential) => {

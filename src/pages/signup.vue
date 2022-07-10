@@ -25,11 +25,18 @@
   const signup_password = ref("");
   const signup_confirm_password = ref("");
 
-  clearFieldAlertOnTyping({signup_email, signup_password, signup_confirm_password})
-  
   const showSubmitButton = ifNoUIError({signup_email, signup_password, signup_confirm_password})
+  clearFieldAlertOnTyping({signup_email, signup_password, signup_confirm_password})
 
+  
   const createAccount = () => {
+
+    // Validators
+    checkRequiredFieldsForSignup(signup_email, signup_password, signup_confirm_password);
+    passwordMatcherForSignup(signup_password, signup_confirm_password);
+    if (foundError({signup_email, signup_password, signup_confirm_password}).value) return;
+
+    // Create account
     loading.signup = true;
     const credential = EmailAuthProvider.credential(signup_email.value, signup_password.value);
 

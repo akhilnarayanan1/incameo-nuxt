@@ -36,3 +36,10 @@ export const ifNoUIError = (...args: {[key:string]: Ref<string>}[]) => {
     return fieldProps.includes(o.fieldid) && o.type === "error" && o.source === "ui"
   })) < 0 ? true : false);
 }
+
+export const foundError = (...args: {[key:string]: Ref<string>}[]) => {
+  const fieldProps =  Object.keys(args[0]).map((k: string) => k);;
+  return computed(()=>(_.findIndex(getFieldAlerts().value, (o: {fieldid: string, type: string, source: string}) => {
+    return fieldProps.includes(o.fieldid) && o.type === "error"
+  })) < 0 ? false : true);
+}
