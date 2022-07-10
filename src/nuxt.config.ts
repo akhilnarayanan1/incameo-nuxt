@@ -1,8 +1,8 @@
-import { defineNuxtConfig } from 'nuxt3'
-import { config } from 'dotenv'
-config()
+import { defineNuxtConfig } from 'nuxt'
+import { config } from 'dotenv';
+config();
 
-// https://v3.nuxtjs.org/docs/directory-structure/nuxt.config
+// https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
   publicRuntimeConfig: {
     firebaseApiKey: process.env.FIREBASE_API_KEY || "XXXXXXXXXXXXXXXXX",
@@ -12,20 +12,5 @@ export default defineNuxtConfig({
     firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "XXXXXXXXXXXXXXXXX",
     firebaseAppId: process.env.FIREBASE_APP_ID || "XXXXXXXXXXXXXXXXX",
     firebaseMeasurementId: process.env.FIREBASE_MEASUREMENT_ID || "XXXXXXXXXXXXXXXXX",
-    instagramClientId: process.env.INSTAGRAM_CLIENT_ID || "XXXXXXXXXXXXXXXXX",
-    facebookClientId: process.env.FACEBOOK_CLIENT_ID || "XXXXXXXXXXXXXXXXX",
-    instagramRedirectUri: process.env.INSTAGRAM_REDIRECT_URI || "https://localhost:3000/auth/instagram-verify/",
-    facebookRedirectUri: process.env.FACEBOOK_REDIRECT_URI || "https://localhost:3000/auth/facebook-verify/",
-    instagramVerifyUrl: process.env.FIREBASE_FUNCTIONS_INSTAGRAM || "http://localhost:5001/incameo-test/us-central1/api/instagramVerify",
-    facebookVerifyUrl: process.env.FIREBASE_FUNCTIONS_FACEBOOK || "http://localhost:5001/incameo-test/us-central1/api/facebookVerify",
-
   },
-    vite: {
-        server: {
-          hmr: {
-            protocol: 'ws',
-            host: 'localhost',
-          }
-        }
-    }
 })

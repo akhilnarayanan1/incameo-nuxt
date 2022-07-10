@@ -1,49 +1,23 @@
 <template>
-    <div>
-        <button @click="signupFacebook">FACEBOOK</button>
-        <button @click="logout">logout</button>
-    </div>
+
+  <form>
+    <input v-model="signup_email" type="email" placeholder="Enter your e-mail" class="w-full input"> 
+    <input v-model="signup_password" type="password" placeholder="Choose a password" class="w-full input" autocomplete="false"> 
+    <input v-model="signup_confirm_password" type="password" placeholder="Confirm your password" class="w-full input" autocomplete="false"> 
+    <button type="submit" >CREATE ACCOUNT</button>
+  </form>
+
 </template>
 
 <script setup lang="ts">
-    import { signInWithPopup, FacebookAuthProvider, signOut } from "firebase/auth";
-    import { doc, setDoc, serverTimestamp } from "firebase/firestore"; 
 
-    const provider = new FacebookAuthProvider();
+  const signup_email = ref("");
+  const signup_password = ref("");
+  const signup_confirm_password = ref("");
 
-    const { $firebaseAuth, $firebaseDB } = useNuxtApp();
-    
-    provider.setCustomParameters({
-        'display': 'popup',
-        // 'auth_type': 'reauthenticate'
-    });
+  clearFieldAlertOnTyping({signup_email, signup_password, signup_confirm_password})
+  
 
-    const logout = async () => {
-        signOut($firebaseAuth).then(() => {
-            // Sign-out successful.
-        }).catch((error) => {
-            // An error happened.
-        });
-    };
 
-    const signupFacebook = () => {
-       signInWithPopup($firebaseAuth, provider)
-        .then(async (result) => {
-            const user = result.user;
-            const credential = FacebookAuthProvider.credentialFromResult(result);
-            const accessToken = credential.accessToken;
-            await setDoc(doc($firebaseDB, "users", user.uid), {
-                name: user.displayName,
-                createdAt: serverTimestamp(),
-            }, { merge: true });
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            const email = error.email;
-            const credential = FacebookAuthProvider.credentialFromError(error);
-        });
-    };
 
-    
 </script>
